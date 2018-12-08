@@ -417,7 +417,7 @@
                 });
 
                 if(this.reset_test()){
-                    this.$http.post('/reset',{
+                    this.$http.post('/updatestudent',{
                         name       : this.student.name,
                         sex        : this.student.sex,
                         faculty    : this.student.faculty,

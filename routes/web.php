@@ -6,8 +6,8 @@ Route::get('/', function () {
 Route::post('/sign','student\StudentController@addStudent');            //学生报名
 Route::post('/search','student\StudentController@search');              //查找学生信息
 Route::get('/export','excel\ExcelController@export');                   //导出学生表
-Route::post('/reset','student\StudentController@reset');                //修改学生信息
-Route::get('/getfaculty','student\StudentController@getFaculty');            //获取学生院系信息
+Route::post('/updatestudent','student\StudentController@updateStudent');//修改学生信息
+Route::get('/getfaculty','student\StudentController@getFaculty');       //获取学生院系信息
 
 Route::post('/sms','sms\smsController@code');                           //发送短信验证
 

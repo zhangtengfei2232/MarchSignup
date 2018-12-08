@@ -6,8 +6,8 @@
  * @return \Illuminate\Http\JsonResponse
  */
      function responseToJson($code, $msg, $datas = ''){
-         $res["code"] = $code;
-         $res["msg"] = $msg;
+         $res["code"]  = $code;
+         $res["msg"]   = $msg;
          $res["datas"] = $datas;
          return response()->json($res);
      }
@@ -18,8 +18,8 @@
  * @return mixed
  */
      function responseStatus($code, $msg, $datas = ''){
-         $res["code"] = $code;
-         $res["msg"] = $msg;
+         $res["code"]  = $code;
+         $res["msg"]   = $msg;
          $res["datas"] = $datas;
          return $res;
      }

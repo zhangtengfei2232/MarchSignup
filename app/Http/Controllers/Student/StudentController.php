@@ -32,7 +32,7 @@ class StudentController extends Controller
      * @param Request $request
      * @return string
      */
-    public function reset(Request $request){
+    public function updateStudent(Request $request){
         $student_id = trim($request->student_id);
         $phone      = trim($request->phone);
         $is_exist_phone = StudentDatabase::byStudnetIdSelectIsExistPhone($student_id,$phone);
@@ -85,7 +85,6 @@ class StudentController extends Controller
     }
     //获取学生的院系信息
     public function getFaculty(){
-        dd(55);
          return responseToJson(0,'查询成功',config('studentinfor.faculty'));
     }
 }
