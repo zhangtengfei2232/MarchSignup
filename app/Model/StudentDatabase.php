@@ -8,11 +8,10 @@ class StudentDatabase extends Model
     /**
      * @return mixed
      */
-    //查询全部学生的信息
+    //查询付款的学生的信息
     public static function seallstudent()
     {
-        $allstuinma = DB::table('newstudent')->get();
-        return $allstuinma;
+        return DB::table('newstudent')->where('is_pay')->get();
     }
     /**
      * @param $student_id

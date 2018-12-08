@@ -3,19 +3,16 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-
 class WeChatPayDatabase  extends Model
 {
     /**
      * @param $student_id
      * @return mixed
      */
-    //统计所有已经订单的学生人数,插入表格
-    public static function wecotstuorder($student_id)
+    //去查某个学生是否付款
+    public static function weCounterStudentOrder($student_id)
     {
-        $countorderstu = DB::table('wechatpay')->where('student_id',$student_id)->where('is_pay',1)->count();
-        return $countorderstu;
+        return DB::table('wechatpay')->where('student_id',$student_id)->where('is_pay',1)->count();
     }
     /**  微信支付，对数据库的操作
      * @param $student_id
@@ -24,30 +21,28 @@ class WeChatPayDatabase  extends Model
      * @return mixed
      */
    //把订单信息存入数据库
-    public static function insertstuorder($student_id,$phone,$out_trade_no,$pay_ways)
+    public static function addStudentOrder($student_id,$phone,$out_trade_no,$pay_ways)
     {
-        $rest = WeChatPayDatabase::sestuidphone($student_id);
+        $rest = self::selectStudentIsPay($student_id);
         if($rest > 0){
-            return ;
+            return responseStatus(1,'你已经付款');
         }
-        $result = DB::table('wechatpay')
-            ->insertGetId([
-              'student_id'   => $student_id,
-              'phone'        => $phone,
-              'out_trade_no' => $out_trade_no,
-              'is_pay'       => 0,
-              'pay_ways'     => $pay_ways,
-              'created_time' => time()
-                    ]);
-        return $result;
+        $get_id = DB::table('wechatpay')
+                  ->insertGetId([
+                      'student_id'   => $student_id,
+                      'phone'        => $phone,
+                      'out_trade_no' => $out_trade_no,
+                      'is_pay'       => 0,
+                      'pay_ways'     => $pay_ways,
+                      'created_time' => time()
+                  ]);
+        return ($get_id) ? responseStatus(0,'添加订单成功',$get_id)
+                         : responseStatus(1,'添加订单失败');
     }
     //根据学生ID，去查学生是否已经交钱，如果已经交钱，不再插入支付宝订单
-    public static function sestuidphone($student_id)
+    public static function selectStudentIsPay($student_id)
     {
-          $rest = DB::table('wechatpay')
-              ->where(['student_id'=>$student_id,'is_pay'=>1])
-              ->count();
-          return $rest;
+          return DB::table('wechatpay')->where(['student_id'=>$student_id,'is_pay'=>1])->count();
     }
     /**
      * @param $out_trade_no
@@ -85,15 +80,15 @@ class WeChatPayDatabase  extends Model
      * @return mixed
      */
     //根据 “订单ID” ，去更新=>学生已交费
-    public static function updateOrders($oederid)
+    public static function updateOrders($orderid)
     {
-        $result = DB::table('wechatpay')
-            ->where('id',$oederid)
-            ->update([
-                'is_pay' => 1,
-                'updated_time' => time()
-            ]);
-        return $result;
+        $result = DB::table('wechatpay')->where('id',$orderid)
+                  ->update([
+                      'is_pay' => 1,
+                      'updated_time' => time()
+                  ]);
+        return ($result == 1) ? responseToJson(0,'修改订单成功')
+                              : responseToJson(1,'修改订单失败');
     }
     /** 支付宝独有的数据库操作
      * @param $arr
