@@ -39,6 +39,10 @@ class WeChatPayDatabase  extends Model
         return ($get_id) ? responseStatus(0,'添加订单成功',$get_id)
                          : responseStatus(1,'添加订单失败');
     }
+    /**
+     * @param $student_id
+     * @return mixed
+     */
     //根据学生ID，去查学生是否已经交钱，如果已经交钱，不再插入支付宝订单
     public static function selectStudentIsPay($student_id)
     {
@@ -64,22 +68,10 @@ class WeChatPayDatabase  extends Model
         $count = DB::table('wechatpay')->where('student_id',$student_id)->where('is_pay',1)->count();
         return $count;
     }
-    /**
-     * @param $out_trade_no
+    /**根据 “订单ID” ，去更新=>学生已交费
+     * @param $orderid
+     * @return \Illuminate\Http\JsonResponse
      */
-   //根据订单号，修改学生的支付状态
-    public static function updateorstatus($out_trade_no)
-    {
-        DB::table('wechatpay')->where('out_trade_no',$out_trade_no)->update([
-            'is_pay'=>1,
-            'updated_time' => time()
-        ]);
-    }
-    /**
-     * @param $oederid
-     * @return mixed
-     */
-    //根据 “订单ID” ，去更新=>学生已交费
     public static function updateOrders($orderid)
     {
         $result = DB::table('wechatpay')->where('id',$orderid)
@@ -90,14 +82,12 @@ class WeChatPayDatabase  extends Model
         return ($result == 1) ? responseToJson(0,'修改订单成功')
                               : responseToJson(1,'修改订单失败');
     }
-    /** 支付宝独有的数据库操作
-     * @param $arr
+    /**根据“ out_trade_no ”，去查是否有第一个未付款的
+     * @param $out_trade_no
      * @return mixed
      */
-    //根据“ out_trade_no ”，去查是否有第一个未付款的
-    public static function acordoutranse($out_trade_no)
+    public static function byOutTradeNoSelectIsPay($out_trade_no)
     {
-        $count = DB::table('wechatpay')->where(['out_trade_no'=>$out_trade_no,'is_pay'=>0])->first();
-        return $count;
+        return DB::table('wechatpay')->where(['out_trade_no'=>$out_trade_no,'is_pay'=>0])->first();
     }
 }

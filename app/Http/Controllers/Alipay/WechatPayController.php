@@ -13,8 +13,7 @@ class WechatPayController  extends Controller
      * @var null
      */
     protected  $app = null;
-    function getPay(Request $request)
-    {
+    function getPay(Request $request){
         $total_fee    = 1000;                                          //付款金额，单位为分
         $out_trade_no = time();                                        //平台内部订单号
         $phone        = $request->phone;                               //学生电话
@@ -84,8 +83,7 @@ class WechatPayController  extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    function updateOrder(Request $request)
-    {
+    public  function updateOrder(Request $request){
          $reset_order = WeChatPayDatabase::updateOrders($request->id);
          if($reset_order['code'] == 1){
              responseToJson(1,$reset_order['msg']);
@@ -97,8 +95,7 @@ class WechatPayController  extends Controller
      * @return string
      */
     //微信支付签名
-    public function MakeSign($sign)
-	{
+    public function MakeSign($sign){
         //签名步骤一：按字典序排序参数
 		ksort($sign);
 		$string = $this->ToUrlParams($sign);
@@ -115,8 +112,7 @@ class WechatPayController  extends Controller
      * @return string
      */
     //把微信支付签名，封装拼接算法
-    public function ToUrlParams($sign)
-	{
+    public function ToUrlParams($sign){
 		$buff = "";
 		foreach ($sign as $k => $v)
 		{
@@ -131,7 +127,7 @@ class WechatPayController  extends Controller
      * @return array|false|string
      */
     //获取用户的终端IP
-    function getIP() {
+    public function getIP() {
         if (getenv("HTTP_CLIENT_IP"))          //取得用户的IP代码；
             $ip = getenv("HTTP_CLIENT_IP");
         else if(getenv("HTTP_X_FORWARDED_FOR"))//透过代理服务器取得客户端的真实 IP 地址
@@ -178,7 +174,7 @@ class WechatPayController  extends Controller
                 return 'Order not exist.';             // 告诉微信，我已经处理完了，订单没找到，别再通知我了
             }
             if ($successful) {                         // 用户是否支付成功
-                WeChatPayDatabase::updateorstatus($out_no);
+                WeChatPayDatabase::updateOrders($out_no);
                 return true;
             } else {                                   // 用户支付失败
                 return false;

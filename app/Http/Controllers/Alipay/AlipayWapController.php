@@ -15,7 +15,7 @@ class AlipayWapController extends Controller {
         $student_id = $request->student_id;
         $pay_ways   = $request->pay_ways;
         $out_trade_no = 'zan' . uniqid();
-        WeChatPayDatabase::insertstuorder($student_id,$phone,$out_trade_no,$pay_ways);
+        WeChatPayDatabase::addStudentOrder($student_id,$phone,$out_trade_no,$pay_ways);
         $subject = '报名费';
         $total_amount = 10;
         $body = '三月报名费用';
@@ -40,50 +40,51 @@ class AlipayWapController extends Controller {
             if($alipaySevice->appid == $arr['app_id']){   //
                 $out_trade_no = $arr['out_trade_no'];
                 if($out_trade_no != null){
-                    $order = WeChatPayDatabase::acordoutranse($out_trade_no);
+                    $order = WeChatPayDatabase::byOutTradeNoSelectIsPay($out_trade_no);
                     if($order){
-                        WeChatPayDatabase::updateorstatus($out_trade_no);
-                        $student_id = session('student_id');
-                        $phone      = session('phone');
-                        $name       = session('name');
-                        $sex        = session('sex');
-                        $faculty    = session('faculty');
-                        $profession = session('profession');
-                        $QQ         = session('QQ');
-                        $class      = session('class');
-                        $introduce  = session('introduce');
-                        StudentDatabase::insertstudent($name,$sex,$faculty,$profession,$class,$student_id,$phone,$QQ,$introduce);
-                        $this->deletesession();
-                        return  redirect('http://www.lishanlei.cn/#/select/报名成功');
+                        WeChatPayDatabase::updateOrders($out_trade_no);
+                        $datas = [
+                            'name'       => session('name'),
+                            'sex'        => session('sex'),
+                            'faculty'    => session('faculty'),
+                            'profession' => session('profession'),
+                            'class'      => session('class'),
+                            'student_id' => session('student_id'),
+                            'phone'      => session('phone'),
+                            'QQ'         => session('QQ'),
+                            'introduce'  => session('introduce')
+                        ];
+                        StudentDatabase::addStudentDatas($datas);
+                        self::emptySession();
+                        return  redirect('http://www.marchsignup.zhangtengfei-steven.cn/#/select/报名成功');
                     }
                 }
-                return  redirect('http://www.lishanlei.cn/#/select/报名成功');
+                return  redirect('http://www.marchsignup.zhangtengfei-steven.cn/#/select/报名成功');
             }else{
-                return  redirect('http://www.lishanlei.cn/#/select/报名失败');
+                return  redirect('http://www.marchsignup.zhangtengfei-steven.cn/#/select/报名失败');
             }
         }
     }
-    //
     public function alipayNotify(){
-        $arr=$_POST;
-        $status = $_POST['trade_status'];                    //
-        if($status == 'TRADE_SUCCESS' || $status == 'TRADE_FINISHED'){ //
+        $arr = $_POST;
+        $status = $_POST['trade_status'];
+        if($status == 'TRADE_SUCCESS' || $status == 'TRADE_FINISHED'){
             //交易成功
             $out_trade_no = $arr['out_trade_no'];
             if($out_trade_no != null){
-                $order = WeChatPayDatabase::acordoutranse($out_trade_no);
+                $order = WeChatPayDatabase::byOutTradeNoSelectIsPay($out_trade_no);
                 if($order){
-                    WeChatPayDatabase::updateorstatus($out_trade_no);
+                    WeChatPayDatabase::updateOrders($out_trade_no);
                 }
             }
-            return  redirect('http://www.lishanlei.cn/#/select');
+            return  redirect('http://www.marchsignup.zhangtengfei-steven.cn/#/select');
         }
-        return  redirect('http://www.lishanlei.cn/#/select');
+        return  redirect('http://www.marchsignup.zhangtengfei-steven.cn/#/select');
     }
     //把用户的东西存入session
     public function saveinmation(Request $request)
     {
-        $this->deletesession();                //在存入信息前，先把上次的session值清空,防止学生请求停止报名
+        self::emptySession();                //在存入信息前，先把上次的session值清空,防止学生请求停止报名
         session([
             'student_id'=>$request->student_id,
             'phone'     =>$request->phone,
@@ -97,7 +98,7 @@ class AlipayWapController extends Controller {
         ]);
     }
     //清空session
-    public function deletesession()
+    public function emptySession()
     {
         Session::flush();
     }

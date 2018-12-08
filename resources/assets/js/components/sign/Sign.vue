@@ -158,6 +158,7 @@
     export default {
         data() {
             return {
+                faculty_datas:  '',
                 img_group : '/dist/img/marchsofts.png',
                 form: {
                     name:       '',
@@ -166,9 +167,9 @@
                     profession: '',
                     class:      '',
                     student_id: '',
-                    phone:  '',
+                    phone:      '',
                     QQ:         '',
-                    introduce:   '',
+                    introduce:  '',
                 },
                 pay_ways : 0,
                 time: 0,
@@ -193,7 +194,7 @@
             },
             test(){
                 var reg_name    = /^[\u4E00-\u9FA5]{2,5}$/;
-                var reg_id      = /^2018\d{6,7}$/;
+                var reg_id      = /^2019\d{7}$/;
                 var reg_mobile  = /^1[3|5|7|8|4|9|6]\d{9}$/;
                 var reg_phone   = /^0\d{2,3}-?\d{7,8}$/;
                 if(!(reg_name.test(this.form.name))){
@@ -267,7 +268,7 @@
                 let self = this;
                 self.remove_spaces();
                 if (self.test()){
-                this.$http.post('stuissign', {
+                this.$http.post('issignup', {
                     phone:      self.form.phone,
                     student_id: self.form.student_id,
                 }).then(
@@ -312,7 +313,7 @@
                 }).then(
                     function (response) {
                         let data = response.data;
-                        if(data.code == 1){
+                        if(data.code == 0){
                             self.sicallpay(data.result);
                         }
                         else {
@@ -340,12 +341,12 @@
                 let self = this;
                 WeixinJSBridge.invoke(
                     'getBrandWCPayRequest', {
-                        "appId":result.appId,
+                        "appId":    result.appId,
                         "timeStamp":result.timeStamp,
-                        "nonceStr":result.nonceStr,
-                        "package":result.package,
-                        "signType":"MD5",
-                        "paySign":result.paySign
+                        "nonceStr": result.nonceStr,
+                        "package":  result.package,
+                        "signType": "MD5",
+                        "paySign":  result.paySign
                     },
                     function (res) {
                         if (res.err_msg == "get_brand_wcpay_request:ok") {
@@ -368,6 +369,18 @@
                     self.onSubmit()
                 )
             },
+            getfaculty(){
+                this.$http.get('/getfaculty', {
+
+                }).then(function(res){
+                    this.faculty_datas = res.data.datas;
+                })
+            }
+        },
+        mounted: function(){
+            console.log("dsdsd");
+            return ;
+            this.getfaculty();
         }
     }
 </script>

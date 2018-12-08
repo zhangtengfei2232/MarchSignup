@@ -3,7 +3,6 @@ namespace App\Http\Controllers\Excel;
 
 use App\Http\Controllers\Controller;
 use App\Model\StudentDatabase;
-use APP\Model\WeChatPayDatabase;
 use Maatwebsite\Excel\Facades\Excel;
 class ExcelController extends Controller
 {
@@ -14,8 +13,6 @@ class ExcelController extends Controller
         $pay_ways = config('studentinfor.pay_ways');
         $Data = StudentDatabase::seallstudent();
         foreach ($Data as $student ){
-              $count = WeChatPayDatabase::selectStudentIsPay($student->student_id);
-              if($count == 0) continue;
               ($student->pay_ways == 0) ? $student->pay_ways = $pay_ways[0] : $student->pay_ways = $pay_ways[1];
               $cellData[] = [
                   $student->id,

@@ -1,22 +1,16 @@
 <?php
+namespace App\Http\Controllers\SmsVerification;
 
-	namespace App\Http\Controllers\sms;
-
-	use Aliyun\Core\Config;
-	use Aliyun\Core\Profile\DefaultProfile;
-	use Aliyun\Core\DefaultAcsClient;
-	use Aliyun\Api\Sms\Request\V20170525\SendSmsRequest;
-	use Aliyun\Api\Sms\Request\V20170525\QuerySendDetailsRequest;
-
-	use App\Http\Controllers\Controller;
-
-
-	// 加载区域结点配置
-	Config::load();
-
+use Aliyun\Core\Config;
+use Aliyun\Core\Profile\DefaultProfile;
+use Aliyun\Core\DefaultAcsClient;
+use Aliyun\Api\Sms\Request\V20170525\SendSmsRequest;
+use Aliyun\Api\Sms\Request\V20170525\QuerySendDetailsRequest;
+use App\Http\Controllers\Controller;
+// 加载区域结点配置
+Config::load();
 	class SmsController extends Controller 
 	{
-
 		/**
 		 * 构造器
 		 * @param string $accessKeyId    必填，AccessKeyId
