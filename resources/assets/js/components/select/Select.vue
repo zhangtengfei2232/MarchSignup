@@ -69,22 +69,7 @@
             </el-form-item>
             <el-form-item>
                 <el-select v-model="student.faculty" placeholder="请选择院系" style="width: 100%">
-                    <el-option label="信息工程学院" value="0"></el-option>
-                    <el-option label="数学科学学院" value="1"></el-option>
-                    <el-option label="机电学院" value="2"></el-option>
-                    <el-option label="食品学院" value="3"></el-option>
-                    <el-option label="动物科技学院" value="4"></el-option>
-                    <el-option label="园艺园林学院" value="5"></el-option>
-                    <el-option label="资源与环境学院" value="6"></el-option>
-                    <el-option label="化学化工学院" value="7"></el-option>
-                    <el-option label="文法学院" value="8"></el-option>
-                    <el-option label="教育科学学院" value="9"></el-option>
-                    <el-option label="艺术学院" value="10"></el-option>
-                    <el-option label="服装学院" value="11"></el-option>
-                    <el-option label="生命科技学院" value="12"></el-option>
-                    <el-option label="外国语学院" value="13"></el-option>
-                    <el-option label="体育学院" value="14"></el-option>
-                    <el-option label="经济与管理学院" value="15"></el-option>
+                    <el-option v-for="(item,index) in faculty_datas" :key="index" :value="index">{{item}}</el-option>
                 </el-select>
                 <div class="open opens"><span>新科学院暂未开放</span></div>
             </el-form-item>
@@ -208,24 +193,7 @@
         data() {
             return {
                 sex       :['女','男'],
-                faculty   :[
-                    '信息工程学院',
-                    '数学科学学院',
-                    '机电学院',
-                    '食品学院',
-                    '动物科技学院',
-                    '园艺园林学院',
-                    '资源与环境学院',
-                    '化学化工学院',
-                    '文法学院',
-                    '教育科学学院',
-                    '艺术学院',
-                    '服装学院',
-                    '生命科技学院',
-                    '外国语学院',
-                    '体育学院',
-                    '经济与管理学院',
-                ],
+                faculty_datas: '',
                 pay_ways : 0,
                 is_pc     : false,
                 show_meg  : false,
@@ -249,89 +217,6 @@
             }
         },
         methods: {
-            chosepay(){
-                var ua = window.navigator.userAgent.toLowerCase();
-                if (ua.match(/MicroMessenger/i) == 'micromessenger') {
-                    this.pay();
-                }else {
-                    this.pay_ways = 1;
-                    window.location.href = '/alipay/wappay?phone='+this.student.phone+'&student_id='+this.student_id+'&pay_ways='+this.pay_ways;
-                }
-            },
-            pay(){
-                let self = this;
-                this.$http.post('wechatpay/getpay',{
-                    student_id : this.student_id,
-                    phone      : this.student.phone,
-                    pay_ways   : this.pay_ways,
-                }).then(
-                    function (response) {
-                        if(response.data.code == 1){
-                            self.callpay(response.data.result);
-                        }else{
-                            alert(response.data.msg);
-                        }
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
-            },
-            callpay(result){
-                if (typeof WeixinJSBridge == "undefined"){
-                    if( document.addEventListener ){
-                        document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
-                    }else if (document.attachEvent){
-                        document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
-                        document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
-                    }
-                }else{
-                    this.onBridgeReady(result);
-                }
-            },
-            onBridgeReady(result){
-                let self = this;
-                WeixinJSBridge.invoke(
-                    'getBrandWCPayRequest', {
-                          "appId":result.appId,
-                          "timeStamp":result.timeStamp,
-                          "nonceStr":result.nonceStr,
-                          "package":result.package,
-                          "signType":"MD5",
-                          "paySign":result.paySign
-                    },
-                    function (res) {
-                        if(res.err_msg == "get_brand_wcpay_request:ok"){
-                            alert("恭喜你，支付成功");
-                            self.updateOrder(result.payId);
-                        }else {
-                            alert("支付失败");
-                        }
-                    }
-                );
-            },
-            updateOrder(orderid){
-                this.$http.post('/wechatpay/updateOrder', {
-                    id : orderid,
-                }).then(
-                    this.onSearchClick()
-                )
-            },
-            remove_spaces(){
-                this.student_id  = this.student_id.trim();
-            },
-            test(){
-                var reg_id = /^20\d{8,9}$/;
-                if(!reg_id.test(this.student_id)){
-                    this.$message({
-                        showClose: true,
-                        message: '学号错误，请重新填写',
-                        type: 'warning'
-                    });
-                }else {
-                    return true;
-                }
-                return false;
-            },
             onSearchClick() {
                 this.searching = true;
                 this.remove_spaces();
@@ -345,16 +230,7 @@
                             if(data.code == 0){
                                 this.show_reset = false;
                                 this.show_meg = true;
-                                this.student.name       = data.msg.name;
-                                this.student.sex        = data.msg.sex;
-                                this.student.faculty    = data.msg.faculty;
-                                this.student.profession = data.msg.profession;
-                                this.student.class      = data.msg.class;
-                                this.student.phone      = data.msg.phone;
-                                this.student.QQ         = data.msg.QQ;
-                                this.student.introduce  = data.msg.introduce;
-                                this.student.create_time= data.msg.create_time;
-                                this.student.is_pay     = data.msg.is_pay;
+                                self.student = data.datas;
                             } else {
                                 this.$message({
                                     showClose: true,
@@ -367,87 +243,42 @@
                 }
                 this.searching = false;
             },
-            reset_remove_spaces(){
-                this.student.name        = this.student.name.trim();
-                this.student.profession  = this.student.profession.trim();
-                this.student.class       = this.student.class.trim();
-                this.student.phone       = this.student.phone.trim();
-                this.student.QQ          = this.student.QQ.trim();
-            },
-            reset_test(){
-                var reg_name    = /^[\u4E00-\u9FA5]{2,4}$/;
-                var reg_mobile  = /^1[3|5|8|4|7|6|9]\d{9}$/;
-                var reg_phone   = /^0\d{2,3}-?\d{7,8}$/;
-
-                if(!(reg_name.test(this.student.name))){
-                    this.$message({
-                        showClose: true,
-                        message: '姓名错误，请重新填写',
-                        type: 'warning'
-                    });
-                }else if(this.student.class.length < 5 || this.student.class.length > 10){
-                    this.$message({
-                        showClose: true,
-                        message: '班级错误，请重新填写',
-                        type: 'warning'
-                    });
-                }else if(!reg_mobile.test(this.student.phone) && !reg_phone.test(this.student.phone)){
-                    this.$message({
-                        showClose: true,
-                        message: '电话号码错误，请重新填写',
-                        type: 'warning'
-                    });
-                }else {
-                    return true;
-                }
-                return false;
-            },
             onSubmit() {
-                this.reset_remove_spaces();
-
-                if(this.student.sex == '男')
-                    this.student.sex = 1;
-                else if(this.student.sex == '女')
-                    this.student.sex = 0;
-
-                var self = this;
-                this.faculty.forEach(function (value,index) {
-                    if(self.student.faculty == value)
-                        self.student.faculty = index;
-                });
-
-                if(this.reset_test()){
-                    this.$http.post('/updatestudent',{
-                        name       : this.student.name,
-                        sex        : this.student.sex,
-                        faculty    : this.student.faculty,
-                        profession : this.student.profession,
-                        class      : this.student.class,
-                        student_id : this.student.student_id,
-                        phone      : this.student.phone,
-                        QQ         : this.student.QQ,
-                        introduce  : this.student.introduce
-                    }).then(
-                        function (response) {
-                            var data = response.data;
-                            if(data.code == 0){
-                                this.$message({
-                                    showClose: true,
-                                    message: data.msg,
-                                    type: 'success'
-                                });
-                                this.show_reset = false;
-                                this.show_meg   = true;
-                            } else {
-                                this.$message({
-                                    showClose: true,
-                                    message: data.msg,
-                                    type: 'error'
-                                });
-                            }
-                        }
-                    )
+                let self = this;
+                self.remove_spaces();
+                if(!self.test(self.student)){
+                    return false;
                 }
+                this.$http.post('/updatestudent',{
+                    name       : self.student.name,
+                    sex        : self.student.sex,
+                    faculty    : self.student.faculty,
+                    profession : self.student.profession,
+                    class      : self.student.class,
+                    student_id : self.student.student_id,
+                    phone      : self.student.phone,
+                    QQ         : self.student.QQ,
+                    introduce  : self.student.introduce
+                }).then(
+                    function (response) {
+                        var data = response.data;
+                        if(data.code == 0){
+                            this.$message({
+                                showClose: true,
+                                message: data.msg,
+                                type: 'success'
+                            });
+                            this.show_reset = false;
+                            this.show_meg   = true;
+                        } else {
+                            this.$message({
+                                showClose: true,
+                                message: data.msg,
+                                type: 'error'
+                            });
+                        }
+                    }
+                )
             },
             change_date(){
                 Date.prototype.format = function (fmt) {
@@ -458,7 +289,7 @@
                         "m+": this.getMinutes(),                        //分
                         "s+": this.getSeconds(),                        //秒
                         "q+": Math.floor((this.getMonth() + 3) / 3),    //季度
-                        "S": this.getMilliseconds()                     //毫秒
+                        "S" : this.getMilliseconds()                    //毫秒
                     };
                     if (/(y+)/.test(fmt)) {
                         fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
@@ -475,9 +306,18 @@
                 this.student.sex        = this.sex[this.student.sex];
                 this.student.faculty    = this.faculty[this.student.faculty];
                 this.student.student_id = this.student_id;
-                this.show_meg   = false;
-                this.show_reset = true;
+                this.show_meg           = false;
+                this.show_reset         = true;
+            },
+            getfacultys(){
+                this.$http.get('/getfaculty', {
+                }).then(function(response){
+                    this.faculty_datas = response.data.datas;
+                })
             }
         },
+        mounted: function () {
+            this.getfacultys();
+        }
     }
 </script>

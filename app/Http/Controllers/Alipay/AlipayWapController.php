@@ -82,7 +82,7 @@ class AlipayWapController extends Controller {
         return  redirect('http://www.marchsignup.zhangtengfei-steven.cn/#/select');
     }
     //把用户的东西存入session
-    public function saveinmation(Request $request)
+    public function saveStudentInformation(Request $request)
     {
         self::emptySession();                //在存入信息前，先把上次的session值清空,防止学生请求停止报名
         session([

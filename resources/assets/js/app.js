@@ -17,7 +17,8 @@ import ElementUI from 'element-ui'
 import '../element/index.css'
 import App from './App.vue'
 import router from './router/index.js'
-
+import base from './base'
+Vue.use(base);
 Vue.use(ElementUI)
 
 new Vue({

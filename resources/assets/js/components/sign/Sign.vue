@@ -169,85 +169,48 @@
                     confirmButtonText: '确定',
                 });
             },
-            remove_spaces(){
-                this.form.name        = this.form.name.trim();
-                this.form.profession  = this.form.profession.trim();
-                this.form.class       = this.form.class.trim();
-                this.form.student_id  = this.form.student_id.trim();
-                this.form.phone       = this.form.phone.trim();
-                this.form.QQ          = this.form.QQ.trim();
-            },
-            test(){
-                var reg_name    = /^[\u4E00-\u9FA5]{2,5}$/;
-                var reg_id      = /^2019\d{7}$/;
-                var reg_mobile  = /^1[3|5|7|8|4|9|6]\d{9}$/;
-                var reg_phone   = /^0\d{2,3}-?\d{7,8}$/;
-                if(!(reg_name.test(this.form.name))){
-                    this.$message({
-                        showClose: true,
-                        message: '姓名错误，请重新填写',
-                        type: 'warning'
-                    });
-                }else if(this.form.class.length < 5 || this.form.class.length > 10){
-                    this.$message({
-                        showClose: true,
-                        message: '班级错误，请重新填写',
-                        type: 'warning'
-                    });
-                }else if(!reg_id.test(this.form.student_id)){
-                    this.$message({
-                        showClose: true,
-                        message: '学号错误，请重新填写',
-                        type: 'warning'
-                    });
-                }else if(!reg_mobile.test(this.form.phone) && !reg_phone.test(this.form.phone)){
-                    this.$message({
-                        showClose: true,
-                        message: '电话号码错误，请重新填写',
-                        type: 'warning'
-                    });
-                }else if(!this.checked){
+            onSubmit() {
+                let self = this;
+                self.remove_spaces(self.form);
+                if(!this.checked){
                     this.$message({
                         showClose: true,
                         message: '请同意招新规则',
                         type: 'warning'
                     });
                 }
-                else {
-                    return true;
+                if(!self.validateFields(self.form)){
+                    return false;
                 }
-                return false;
-            },
-            onSubmit() {
-                let self = this;
-                this.remove_spaces();
-                if(this.test()){
-                    this.$http.post('/sign',{
-                        name       : this.form.name,
-                        sex        : this.form.sex,
-                        faculty    : this.form.faculty,
-                        profession : this.form.profession,
-                        class      : this.form.class,
-                        student_id : this.form.student_id,
-                        phone      : this.form.phone,
-                        QQ         : this.form.QQ,
-                        introduce  : this.form.introduce,
-                    }).then(
-                        function (response) {
-                            var data = response.data;
-                            if(data.code == 0){
-                                alert(data.msg);
-                                location.href='http://www.lishanlei.cn/#/select'
-                            }else if(data.code == 1) {
-                                self.$message({
-                                    showClose: true,
-                                    message: data.msg,
-                                    type: 'error'
-                                });
-                            }
+                self.$http.post('/sign',{
+                    name       : self.form.name,
+                    sex        : self.form.sex,
+                    faculty    : self.form.faculty,
+                    profession : self.form.profession,
+                    class      : self.form.class,
+                    student_id : self.form.student_id,
+                    phone      : self.form.phone,
+                    QQ         : self.form.QQ,
+                    introduce  : self.form.introduce,
+                }).then(
+                    function (response) {
+                        var data = response.data;
+                        if(data.code == 0){
+                            self.$message({
+                               showClose: true,
+                               message  : data.msg,
+                               type     : 'success'
+                            });
+                            this.$router.push({path: '/select'});
+                        }else if(data.code == 1) {
+                            self.$message({
+                                showClose: true,
+                                message: data.msg,
+                                type: 'error'
+                            });
                         }
-                    )
-                }
+                    }
+                )
             },
             chosepay() {
                 let self = this;
@@ -255,7 +218,7 @@
                 return ;
                 self.remove_spaces();
                 if (self.test()){
-                this.$http.post('issignup', {
+                    self.$http.post('issignup', {
                     phone:      self.form.phone,
                     student_id: self.form.student_id,
                 }).then(
@@ -273,7 +236,7 @@
                                     self.postpay();
                                 } else {
                                     self.pay_ways = 1;
-                                    self.$http.post('savestuma',{
+                                    self.$http.post('savestudentinformation',{
                                         phone:      self.form.phone,
                                         student_id: self.form.student_id,
                                         name:       self.form.name,
@@ -282,7 +245,7 @@
                                         profession: self.form.profession,
                                         class:      self.form.class,
                                         QQ:         self.form.QQ,
-                                        introduce:  self.form.introduce,
+                                        introduce:  self.form.introduce
                                     });
                                     window.location.href = '/alipay/wappay?phone='+self.form.phone+'&student_id='+self.form.student_id+'&pay_ways='+self.pay_ways;
                                  }
@@ -293,10 +256,10 @@
             },
             postpay(){
                 let self = this;
-                this.$http.post('wechatpay/getpay',{
-                    student_id : this.form.student_id,
-                    phone      : this.form.phone,
-                    pay_ways   : this.pay_ways,
+                self.$http.post('wechatpay/getpay',{
+                    student_id : self.form.student_id,
+                    phone      : self.form.phone,
+                    pay_ways   : self.pay_ways,
                 }).then(
                     function (response) {
                         let data = response.data;
@@ -335,8 +298,8 @@
                         "signType": "MD5",
                         "paySign":  result.paySign
                     },
-                    function (res) {
-                        if (res.err_msg == "get_brand_wcpay_request:ok") {
+                    function (response) {
+                        if (response.err_msg == "get_brand_wcpay_request:ok") {
                             self.updateOrders(result.payId);
                         } else {
                             self.$message({
@@ -358,9 +321,8 @@
             },
             getfaculty(){
                 this.$http.get('/getfaculty', {
-
-                }).then(function(res){
-                    this.faculty_datas = res.data.datas;
+                }).then(function(response){
+                    this.faculty_datas = response.data.datas;
                 })
             }
         },

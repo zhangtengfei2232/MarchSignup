@@ -14,7 +14,7 @@ Route::post('/sms','sms\smsController@code');                           //发送
 Route::any('/ceshi','sms\ceshiSms@aaa');
 //
 Route::post('issignup','student\StudentController@selectStudentIsSignUp');//查询学生是否报名或者手机号是否被占用
-Route::post('savestuma','Alipay\AlipayWapController@saveinmation');        //把学生信息存进session
+Route::post('savestudentinformation','Alipay\AlipayWapController@saveStudentInformation');//把学生信息存进session
 //支付宝支付
 Route::group(['prefix' => 'alipay'],function() {
     Route::get('wappay','Alipay\AlipayWapController@alipayWapPay');     //
